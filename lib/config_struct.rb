@@ -1,10 +1,6 @@
-class ConfigStruct
-  TheClass = ::ConfigStruct
-
-  def initialize hash, parent = nil
-    @__keys__ = []
-    @__parent__ = parent
-    @__children__ = children = []
+class Hash
+  def split_into_values_hashes_arrays
+    hash = self
 
     pairs = hash.to_a
     groups = pairs.group_by { |key, value|
@@ -17,25 +13,98 @@ class ConfigStruct
     }
     values = groups[:values] || []
     hashes = groups[:hashes] || []
-    #arrays = groups[:arrays] || []
+    arrays = groups[:arrays] || []
+
+    [ values, hashes, arrays ]
+  end
+end
+
+
+class Object
+  def self.delegate_value on:, key:, to:;
+    on.instance_eval "
+      @__keys__ << key
+
+      @_delegate_#{key}_to = to
+
+      def #{key}
+        @_delegate_#{key}_to.__send__ :#{key}
+      end
+    "
+  end
+
+  def self.delegate_missing_to_parent child
+    right_object7 = !! child.__keys__ rescue false
+    return unless right_object7
+
+    parent = child.instance_eval { @__parent__ }
+
+    missing_keys = parent.__keys__ - child.__keys__
+    missing_keys.each { |key|
+      Object.delegate_value on: child, key: key, to: parent
+    }
+
+    child.instance_eval { @__children__ }
+    .each { |x| x.delegate_missing_to_parent }
+  end
+end
+
+
+class AsObjectChild
+
+  def initialize object
+    @object = object
+  end
+
+  def delegate_missing_to_parent
+    Object.delegate_missing_to_parent @object
+  end
+
+end
+
+
+class AsArrayChild
+
+  def initialize array
+    @array = array
+  end
+
+  def delegate_missing_to_parent
+    @array.flatten.each { |thing|
+      Object.delegate_missing_to_parent thing
+    }
+  end
+
+end
+
+
+class ConfigStruct
+  TheClass = ::ConfigStruct
+
+  def initialize hash, parent = nil
+    @__keys__ = []
+    @__parent__ = parent
+    @__children__ = children = []
+
+    (values, hashes, arrays) = hash.split_into_values_hashes_arrays
     
     values.each { |key, value|
       TheClass.inject_value self, key, value
     }
-    hashes.each { |key, hash|
-      object = TheClass.new hash, self
-      children << object
+    hashes.each { |key, child_hash|
+      object = TheClass.new child_hash, self
+      children << AsObjectChild.new(object)
       TheClass.inject_value self, key, object
     }
-    #arrays.each { |key, array|
-    #  TheClass.inject_value self, key, array
-    #}
+    arrays.each { |key, array|
+      array = TheClass.recursive_process_array array, self
+      children << AsArrayChild.new(array)
+      TheClass.inject_value self, key, array
+    }
     
-    if parent.nil?
-      # after all objects been created
-
+    if parent.nil?  # (after all objects been created)
       children.each { |child|
-        TheClass.let_child_delegate_missing child: child
+        child.delegate_missing_to_parent
       }
     end
   end
@@ -58,203 +127,116 @@ class ConfigStruct
       "
     end
 
-
-    def delegate_value on:, key:, to:;
-      on.instance_eval "
-        @__keys__ << key
-
-        @_delegate_#{key}_to = to
-
-        def #{key}
-          @_delegate_#{key}_to.__send__ :#{key}
+    def recursive_process_array array, parent
+      array.map { |element|
+        case element
+        when Array then recursive_process_array element, parent
+        when Hash  then TheClass.new element, parent
+        else
+          element
         end
-      "
-    end
-
-    def let_child_delegate_missing child:;
-      parent = child.instance_eval { @__parent__ }
-
-      missing_keys = parent.__keys__ - child.__keys__
-      missing_keys.each { |key|
-        TheClass.delegate_value on: child, key: key, to: parent
       }
-
-      child.instance_eval { @__children__ }
-      .each { |x| let_child_delegate_missing child: x }
-      # delegate missing to it!
     end
-    #  eval " def object.#{key}; value end "
-    #end
-
-    #def introduce_hash object, key, value
-    #  object.instance_eval "
-    #    @#{key} = value
-
-    #    def object.#{key}
-    #      @#{key}
-    #    end
-    #  "
-    #end
-
   end
 end
 
 
 if __FILE__ == $0
-  #p ConfigStruct.new(a: '123', b: { c: 123 }).b.c
-  p ConfigStruct.new(a: '123', b: { c: 123, d: { e: 1} }).b.d.a
-end
+  require 'maxitest/autorun'
 
 
-__END__
-$id = 0
+  describe ConfigStruct do
+    def subj; ConfigStruct end
 
-class ConfigStruct < BasicObject
-  Hash = ::Hash
-  Array = ::Array
-  ThisClass = ::ConfigStruct
+    it 'provides nice access to hashes' do
+      subj.new(a: 123).a.must_equal 123
+    end
 
-  #def self.build hash
-  #end
-  
-  def id
-    @id
-  end
+    it 'provides nice access to nested hashes' do
+      subj.new(a: 123, b: { c: 456 }).b.c.must_equal 456
+    end
 
-  def initialize hash, parent = nil
-    @id = ($id += 1)
-    ::Kernel.p "it: #{@id}"
-    ::Kernel.p "parent: #{parent.id}" rescue nil
+    it 'most notably inherits values from parent hashes into child ones' do
+      subj.new(
+        a: 123,
+        b: {
+          c: 456,
+          d: { e: 789 }
+        }
+      ).tap { |subj|
+        subj.b.d.e.must_equal 789
+        subj.b.d.c.must_equal 456
+        subj.b.d.a.must_equal 123
 
-    # this stuff used for "inheritance of context" as I called it...
-    # you can say that each child have value as if it was merged into the parent
-    # so it can overwrite, but anyway carry all all other stuff
-    #@parent = nil
-    @children = []
-    @keys = []
+        subj.b.b.b.b.a.must_equal 123
 
-    #hash = context.merge hash
-    #@struct_keys = []
-    #if parent == NOPE_IT_IS_ROOT
-    #  # nothing
-    #else
-    ThisClass.assign_children parent: parent, child: self
-    #end
-
-    hash.each { |key, value|
-      value = ThisClass.may_cloth value: value, parent: self
-      
-      omg = value.id rescue false
-      if omg
-        ::Kernel.p "key: #{key}, id: #{omg}"
-      end
-
-      @keys << key
-      instance_eval "
-        @#{key} = value
-
-        def self.#{key}
-          @#{key}
-        end
-      "
-    }
-
-    root = parent == nil  # can't .nil? on BasicObject and `not !!` is alot
-
-
-    if root
-      ::Kernel.p "x-root: #{@id}"
-      @children.each { |child|
-        ThisClass.inherit_missing_keys parent: self, child: child
+        subj.b.d
+            .b.d
+            .b.d
+            .c.must_equal 456
       }
     end
-    #  hash.each { |key, value|
-    #    if __send__(key).class < ThisClass
-    #      ThisClass.delegate_missing from: __send__(key), to: self, keys: @keys
-    #    end
-    #  }
+
+    specify 'so you can access even values from sibling key' do
+      subj.new(
+        a: 123,
+        b: {}
+      ).tap { |subj|
+        subj.b.a.must_equal 123
+      }
+    end
+
+    specify 'but you can\'t jump straight to deep child values' do
+      subj.new(
+        a: 123,
+        b: {
+          c: {
+            d: 456
+          }
+        }
+      ).tap { |subj|
+        (subj.b.d rescue :err).must_equal :err
+      }
+    end
+
+    specify 'so you can think of nested elements as extensions of parent ones' do
+      subj.new(
+        behave: 'normal',
+        mean_weather: {
+          behave: 'mean',
+          warm_fireplace: {
+            behave: 'warm'
+          },
+        }
+      ).tap { |subj|
+        subj.behave.must_equal 'normal'
+        subj.mean_weather.behave.must_equal 'mean'
+        subj.mean_weather.warm_fireplace.behave.must_equal 'warm'
+      }
+    end
+
+    specify 'in nested arrays hashes are also processed and linherit' do
+      subj.new(
+        a: 123,
+        n: [
+          123,
+          456,
+          { x: 1 }
+        ],
+        x: [
+          [
+            [
+              { y: 'found' },
+            ]
+          ]
+        ]
+      ).tap { |subj|
+        subj.x[0][0][0].y.must_equal 'found'
+        subj.x[0][0][0].n.last.x.must_equal 1
+      }
+    end
+
+    #specify '' do
     #end
   end
-
-  def __keys__
-    @keys
-  end
-
-  def self.may_cloth value:, parent:;
-    thing = value
-    case thing
-    when Array then thing.map { |x| may_cloth x, context }
-    when Hash then new thing, parent
-    else
-      thing
-    end
-  end
-
-  def self.delegate_missing from:, to:, keys:;
-    from_keys = from.__send__('__keys__')
-    to_keys = keys
-    missing = to_keys - from_keys
-    p missing
-  end
-
-  def self.assign_children parent:, child:;
-    return unless parent
-    #child.instance_eval {
-    #  @parent = parent
-    #}
-    ::Kernel.p "x-child: #{child.id}"
-    ::Kernel.p "x-parent: #{parent.id}"
-    parent.instance_eval {
-      @children << child
-    }
-  end
-
-  def self.inherit_missing_keys parent:, child:;
-    p 123
-    parent_keys, child_keys = [parent, child].map { |x| x.__send__ '__keys__' }
-    missing_in_child = parent_keys - child_keys
-
-    #require 'pry'; binding.pry
-    #p "#{from.id} - #{to.id}"
-    #p missing_in_child
-    missing_in_child.each { |key|
-      ::Kernel.p "adding-#{key}-to-#{child.id}"
-      child.instance_eval "
-        def #{key}
-          @parent.__send__ :#{key}
-        end
-      "
-    }
-    #p [from.id, to.id]
-    #p from_keys
-    #p to_keys
-  end
-end
-
-
-if __FILE__ == $0
-  subj = ConfigStruct
-  #subj.new(a: 1).a == 1 or raise
-  #subj.new(a: {b: 1}).a.b == 1 or raise
-  struct = { x: 0, a: {b: {c: 1}} }
-  #subj.new(struct).a.b.c == 1 or raise
-  #subj.new(struct).x == 0 or raise
-  subj.new(struct).a.x == 0 or raise
-  #subj.new(a: {b: {c: 1}}).a.b.c == 1 or raise
-
-  # (subj.new(a: {b: 1}).a.b.b rescue :err) == :err or raise
-
-  # subj.new(a: {b: {c: 1}}).a
-  # p subj.new(a: {b: {c: 1}}).a.b.c
-  # subj.new(a: {b: {c: 1}}).a.b.c == 1 or raise
-  # subj.new(a: {b: {c: 1}}).a.b.a.b.b.c == 1 or raise
-
-
-  # subj.new(a: 1).methods
-  #  - nope, end points should be known,
-  #    not just enumerated
-  #  - but on a nested levels
-  #  - should be just arrays of hashes (toml or so)
-
-  puts :OK
 end

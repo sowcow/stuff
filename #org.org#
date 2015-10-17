@@ -1,3 +1,22 @@
+#+BEGIN: clocktable :maxlevel 2 :scope file
+#+CAPTION: Clock summary at [2015-10-17 Сб 21:30]
+| Headline                                |   Time |
+|-----------------------------------------+--------|
+| *Total time*                            | *7:21* |
+|-----------------------------------------+--------|
+| DONE use slim                           |   0:07 |
+| DONE plan urls                          |   0:17 |
+| DONE main page redirects to collections |   0:07 |
+| DONE reloader                           |   0:03 |
+| DONE collections are openable           |   0:05 |
+| DONE collections lists them             |   0:48 |
+| DONE toml                               |   0:48 |
+| DONE config                             |   0:07 |
+| DONE fargo                              |   0:11 |
+| config - traversing parent/root for...  |   0:06 |
+| DONE local zoom config                  |   4:42 |
+#+END:
+
 * DONE use slim
   CLOCK: [2015-10-17 Сб 07:30]--[2015-10-17 Сб 07:37] =>  0:07
 * DONE plan urls
@@ -25,8 +44,10 @@
 * config - traversing parent/root for now (like a graph)
   CLOCK: [2015-10-17 Сб 10:42]--[2015-10-17 Сб 10:48] =>  0:06
   CLOCK: [2015-10-17 Сб 10:42]--[2015-10-17 Сб 10:42] =>  0:00
-* TODO local zoom config
-  CLOCK: [2015-10-17 Сб 17:36]
+* DONE local zoom config
+  CLOCK: [2015-10-17 Сб 20:35]--[2015-10-17 Сб 21:30] =>  0:55
+  CLOCK: [2015-10-17 Сб 19:18]--[2015-10-17 Сб 20:35] =>  1:17
+  CLOCK: [2015-10-17 Сб 17:36]--[2015-10-17 Сб 19:02] =>  1:26
   CLOCK: [2015-10-17 Сб 11:18]--[2015-10-17 Сб 12:21] =>  1:03
   CLOCK: [2015-10-17 Сб 10:59]--[2015-10-17 Сб 11:00] =>  0:01
 
