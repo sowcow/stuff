@@ -9,12 +9,16 @@ class ConfigFile
     new File.read file
   end
 
-  def initialize config
-    @config = ConfigStruct.new TOML.parse config
+  def self.new config
+    ConfigStruct.new TOML.parse config
   end
 
-  extend Forwardable
-  delegate [ :collections ] => :@config
+#  def initialize config
+#    @config = ConfigStruct.new TOML.parse config
+#  end
+#
+#  extend Forwardable
+#  delegate [ :collections ] => :@config
 end
 
 

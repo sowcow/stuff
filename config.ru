@@ -1,4 +1,4 @@
-require_relative 'lib/confg_file'
+require_relative 'lib/config_file'
 require_relative 'models/collections'
 require 'roda'
 require 'slim'
@@ -14,12 +14,13 @@ class App < Roda
       r.redirect '/collections'
     end
     @config = ConfigFile.read
+    # not fixing to relative file name!
+    # because config is a parameter!
+    # hey but rackup seems like fixing, or not?
 
     r.on 'collections' do 
-      @collections = Collections.all
-      #r.get do
-        view :collections
-      #end
+      @collections = Collections.all @config
+      view :collections
     end
 
     # r.is 'artist/:id' do |artist_id|

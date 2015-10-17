@@ -1,0 +1,7 @@
+collections_dir = 'data/collections'
+
+[[collections]]
+
+  dir   = 'tables-rk'
+  slug  = 'tables-rk'
+  name  = 'Таблицы РК'
