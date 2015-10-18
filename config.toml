@@ -20,6 +20,13 @@ collections_dir = 'data/collections'
   name   = 'Код ЗРА'
   server = 'selt'
 
+  getter = 'ddl'
+  object_types = [
+    'PROCEDURE',
+    'FUNCTION',
+    'VIEW'
+  ]
+
 #[[collections]]
 #
 #  dir   = 'tables-rk'

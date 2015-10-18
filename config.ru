@@ -1,7 +1,13 @@
 require_relative 'lib/config_file'
+require_relative 'lib/code_getter'
+require_relative 'lib/state'
 require_relative 'models/collections'
 require 'roda'
 require 'slim'
+
+require 'better_errors'
+use BetterErrors::Middleware
+BetterErrors.application_root = __dir__
 
 
 class App < Roda

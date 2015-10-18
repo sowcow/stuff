@@ -13,7 +13,11 @@ class Collections
     id
     name
     server
+    getter
+    object_types
   ]
+  def dir;  id end
+  def slug; id end
 
   attr_reader *PROPS
 
@@ -29,9 +33,6 @@ class Collections
   def last_update
     State.last_update dir
   end
-
-  def dir;  id end
-  def slug; id end
 
 end
 

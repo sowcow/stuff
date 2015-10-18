@@ -41,7 +41,7 @@ class CodeGetter
 
     last_updated = LastKnownUpdate.for(id)
 
-    session thing.server do
+    session server do
       objects = plsql.dba_objects "
         where object_type #{in_ object_types}
         and last_ddl_time >= :1
@@ -60,6 +60,7 @@ class CodeGetter
   delegate %i[
     id
     object_types
+    server
   ] => :@thing
 
 #  def initialize server:, dir:, id:;

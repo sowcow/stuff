@@ -9,3 +9,6 @@ gem 'sass'
 
 gem 'sqlite3' # some state
 gem 'sequel'
+
+gem 'binding_of_caller' # debug
+gem 'better_errors'
