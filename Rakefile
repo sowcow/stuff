@@ -8,6 +8,7 @@ task :mkdirs do
 
   path = config.collections_dir
   config.collections.each { |x|
-    (Pathname(path) + x.dir).mkpath
+    dir = x.id
+    (Pathname(path) + dir).mkpath
   }
 end
