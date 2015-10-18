@@ -2,24 +2,32 @@ collections_dir = 'data/collections'
 
 [[collections]]
 
-  dir   = 'codes-rk'
-  slug  = 'codes-rk'
-  name  = 'Код РК'
+  id     = 'codes-rk'
+  name   = 'Код РК'
+  server = 'selt.ruskom'
+
+  getter = 'ddl'
+  object_types = [
+    'PROCEDURE',
+    'FUNCTION',
+    'VIEW'
+  ]
+
 
 [[collections]]
 
-  dir   = 'codes-zra'
-  slug  = 'codes-zra'
-  name  = 'Код ЗРА'
+  id     = 'codes-zra'
+  name   = 'Код ЗРА'
+  server = 'selt'
 
-[[collections]]
-
-  dir   = 'tables-rk'
-  slug  = 'tables-rk'
-  name  = 'Таблицы РК'
-
-[[collections]]
-
-  dir   = 'tables-zra'
-  slug  = 'tables-zra'
-  name  = 'Таблицы ЗРА'
+#[[collections]]
+#
+#  dir   = 'tables-rk'
+#  slug  = 'tables-rk'
+#  name  = 'Таблицы РК'
+#
+#[[collections]]
+#
+#  dir   = 'tables-zra'
+#  slug  = 'tables-zra'
+#  name  = 'Таблицы ЗРА'

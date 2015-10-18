@@ -1,8 +1,16 @@
-div
-.ui.container
+
+h5.centered = @collection.name
+  
+
+form method='post'
+  button name='reload' value='true'  Reload code
+  /input type='text'
+  /input type='submit'
+
+/div
+/.ui.container
   ui class=ui_item_menu(@collections.count)
     - @collections.each do |one|
-
       - if one == @collection
         a.active.item
           = one.name

@@ -38,12 +38,27 @@ class App < Roda
         }
         @title = @collection.name
 
-        view :collection
+        r.get do
+          view :collection
+        end
+
+        r.post do
+          getter = CodeGetter.for @collection
+          getter.get
+          r.redirect to(@collection)
+        end
       end
     end
 
   end
 
+
+  # url helpers
+
+  # guards gem if more types needed to handle
+  def to collection
+    "/collections/#{collection.slug}"
+  end
 
   # view helpers
 

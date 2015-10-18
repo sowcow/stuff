@@ -10,9 +10,9 @@ class Collections
   end
 
   PROPS = %i[
-    dir
-    slug
+    id
     name
+    server
   ]
 
   attr_reader *PROPS
@@ -25,6 +25,13 @@ class Collections
       instance_variable_set "@#{name}", value
     }
   end
+
+  def last_update
+    State.last_update dir
+  end
+
+  def dir;  id end
+  def slug; id end
 
 end
 
