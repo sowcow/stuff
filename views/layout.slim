@@ -3,14 +3,10 @@ html
   meta charset='utf-8'
   head
     title = @title
-    link rel='stylesheet' href='/assets/semantic/semantic.min.css'
-    script src='/assets/jq.js'
-    script src='/assets/semantic/semantic.min.js'
-    /== assets :css
+    /link rel='stylesheet' href='/assets/semantic/semantic.min.css'
+    /script src='/assets/jq.js'
+    /script src='/assets/semantic/semantic.min.js'
+    == assets :css
     /== assets :js
   body
     == yield
-    button.ui.animated.button
-      .visible.content Hello
-      .hidden.content
-        i.right.arrow.icon

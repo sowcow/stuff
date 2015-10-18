@@ -1,0 +1,14 @@
+div
+.ui.container
+  ui class=ui_item_menu(@collections.count)
+    - @collections.each do |one|
+
+      - if one == @collection
+        a.active.item
+          = one.name
+          .ui.small.label 1
+      - else
+        a.item href=nest_url(one.slug)
+          = one.name
+          .ui.small.label 1
+

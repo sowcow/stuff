@@ -6,49 +6,69 @@ require 'slim'
 
 class App < Roda
   plugin :render, engine: 'slim'
-  plugin :all_verbs
-  #plugin :assets,
-  #  css: 'semantic.min.css',
-  #  js: ['jq.js', 'semantic.min.js']
+  plugin :assets, css: %w[
+    normalize.css
+    skeleton.css
+    app.sass
+  ]
+  compile_assets
 
 
   route do |r|
-    #r.assets
+    r.assets
+    @config = ConfigFile.read
 
     r.root do
       r.redirect '/collections'
     end
-    @config = ConfigFile.read
-    # not fixing to relative file name!
-    # because config is a parameter!
-    # hey but rackup seems like fixing, or not?
 
     r.on 'collections' do 
       @collections = Collections.all @config
-      view :collections
+      @title = 'Коллекции'
+
+      r.is do
+        r.get do
+          view :collections
+        end
+      end
+
+      r.on ':slug' do |slug|
+        @collection = @collections.find { |x|
+          x.slug == slug
+        }
+        @title = @collection.name
+
+        view :collection
+      end
     end
 
-    # r.is 'artist/:id' do |artist_id|
-    #   @artist = Artist[artist_id]
-    #   check_access(@artist)
+  end
 
-    #   r.get do
-    #     view :artist
-    #   end
 
-    #   r.post do
-    #     @artist.update(r['artist'])
-    #     r.redirect
-    #   end
+  # view helpers
 
-    #   r.delete do
-    #     @artist.destroy
-    #     r.redirect '/'
-    #   end
-    # end
+
+  def ui_item_menu count
+    count = READS.fetch count.to_s
+    "ui item menu #{count}"
+  end
+  READS = {
+    '1' => 'one',
+    '2' => 'two',
+    '3' => 'three',
+    '4' => 'four',
+    '5' => 'five',
+    '6' => 'six',
+    '7' => 'seven',
+    '8' => 'eight',
+    '9' => 'nine',
+  }
+
+  def nest_url url
+    "/collections/#{url}"
   end
 end
 
-use Rack::Static, urls: ['/assets'], root: 'public'
+#use Rack::Static, urls: ['/assets'], root: 'public'
 
 run App.freeze.app

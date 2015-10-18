@@ -1,6 +1,57 @@
-h2 collections
-
-ul
+table.center
   - @collections.each do |one|
-    li = one.name
+    tr
+      td
+        a href=nest_url(one.slug)
+          = one.name
 
+/div
+/.ui.container
+  ui class=ui_item_menu(@collections.count)
+    - @collections.each do |one|
+      a.item href=nest_url(one.slug)
+        = one.name
+        .ui.small.label 1
+
+
+
+/.ui.top.attached.menu
+  .ui.dropdown.icon.item
+    i.wrench.icon
+    .menu
+      .item
+        i.dropdown.icon
+        span.text New
+        .menu
+          .item Document
+          .item Image
+
+/        <div class="item">
+          Open...
+        </div>
+        <div class="item">
+          Save...
+        </div>
+        <div class="item">Edit Permissions</div>
+        <div class="divider"></div>
+        <div class="header">
+          Export
+        </div>
+        <div class="item">
+          Share...
+        </div>
+      </div>
+    </div>
+    <div class="right menu">
+      <div class="ui right aligned category search item">
+        <div class="ui transparent icon input">
+          <input class="prompt" placeholder="Search animals..." type="text">
+          <i class="search link icon"></i>
+        </div>
+        <div class="results"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ui bottom attached segment">
+    <p></p>
+  </div>
