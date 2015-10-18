@@ -7,9 +7,14 @@ require 'slim'
 class App < Roda
   plugin :render, engine: 'slim'
   plugin :all_verbs
+  #plugin :assets,
+  #  css: 'semantic.min.css',
+  #  js: ['jq.js', 'semantic.min.js']
 
 
   route do |r|
+    #r.assets
+
     r.root do
       r.redirect '/collections'
     end
@@ -43,5 +48,7 @@ class App < Roda
     # end
   end
 end
+
+use Rack::Static, urls: ['/assets'], root: 'public'
 
 run App.freeze.app
